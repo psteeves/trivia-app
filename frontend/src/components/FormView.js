@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import $ from 'jquery';
 
 import '../stylesheets/FormView.css';
+import { BACKEND_URL } from '../constants';
 
 class FormView extends Component {
   constructor(props){
-    super();
+    super(props);
     this.state = {
       question: "",
       answer: "",
@@ -17,15 +18,13 @@ class FormView extends Component {
 
   componentDidMount(){
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: `${BACKEND_URL}/categories`, //TODO: update request URL
       type: "GET",
       success: (result) => {
         this.setState({ categories: result.categories })
-        return;
       },
       error: (error) => {
         alert('Unable to load categories. Please try your request again')
-        return;
       }
     })
   }
@@ -34,7 +33,7 @@ class FormView extends Component {
   submitQuestion = (event) => {
     event.preventDefault();
     $.ajax({
-      url: '/questions', //TODO: update request URL
+      url: `${BACKEND_URL}/questions`, //TODO: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -50,20 +49,23 @@ class FormView extends Component {
       crossDomain: true,
       success: (result) => {
         document.getElementById("add-question-form").reset();
-        return;
       },
       error: (error) => {
         alert('Unable to add question. Please try your request again')
-        return;
       }
     })
-  }
+  };
 
   handleChange = (event) => {
     this.setState({[event.target.name]: event.target.value})
-  }
+  };
+
+  isSubmitDisabled = () => {
+    return this.state.name & this.state.answer & this.state.category & this.state.difficulty;
+  };
 
   render() {
+    console.log(this.isSubmitDisabled);
     return (
       <div id="add-form">
         <h2>Add a New Trivia Question</h2>
@@ -96,7 +98,7 @@ class FormView extends Component {
                 })}
             </select>
           </label>
-          <input type="submit" className="button" value="Submit" />
+          <input type="submit" className="button" value="Submit" disabled={this.isSubmitDisabled}/>
         </form>
       </div>
     );
