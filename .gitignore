@@ -1,0 +1,19 @@
+.vscode
+__pycache__
+venv
+.idea
+
+# Project specific files
+backend/trivia.psql
+frontend/node_modules/
+frontend/package-lock.json
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
