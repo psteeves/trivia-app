@@ -5,6 +5,7 @@ venv
 
 # Project specific files
 backend/trivia.psql
+backend/.env
 frontend/node_modules/
 frontend/package-lock.json
 
