@@ -12,13 +12,12 @@ class FormView extends Component {
       answer: "",
       difficulty: 1,
       category: 1,
-      categories: {}
-    }
+      categories: []}
   }
 
   componentDidMount(){
     $.ajax({
-      url: `${BACKEND_URL}/categories`, //TODO: update request URL
+      url: `${BACKEND_URL}/categories`,
       type: "GET",
       success: (result) => {
         this.setState({ categories: result.categories })
@@ -29,11 +28,10 @@ class FormView extends Component {
     })
   }
 
-
   submitQuestion = (event) => {
     event.preventDefault();
     $.ajax({
-      url: `${BACKEND_URL}/questions`, //TODO: update request URL
+      url: `${BACKEND_URL}/questions`,
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -48,6 +46,7 @@ class FormView extends Component {
       },
       crossDomain: true,
       success: (result) => {
+        console.log(result);
         document.getElementById("add-question-form").reset();
       },
       error: (error) => {
@@ -61,11 +60,10 @@ class FormView extends Component {
   };
 
   isSubmitDisabled = () => {
-    return this.state.name & this.state.answer & this.state.category & this.state.difficulty;
+    return Boolean(this.state.name) && Boolean(this.state.answer) && Boolean(this.state.category) && Boolean(this.state.difficulty);
   };
 
   render() {
-    console.log(this.isSubmitDisabled);
     return (
       <div id="add-form">
         <h2>Add a New Trivia Question</h2>
@@ -91,14 +89,14 @@ class FormView extends Component {
           <label>
             Category
             <select name="category" onChange={this.handleChange}>
-              {Object.keys(this.state.categories).map(id => {
+              {this.state.categories.map(category => {
                   return (
-                    <option key={id} value={id}>{this.state.categories[id]}</option>
+                    <option key={category.id} value={category.id}>{category.type}</option>
                   )
                 })}
             </select>
           </label>
-          <input type="submit" className="button" value="Submit" disabled={this.isSubmitDisabled}/>
+          <input type="submit" className="button" value="Submit" disabled={!this.isSubmitDisabled}/>
         </form>
       </div>
     );

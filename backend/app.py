@@ -1,6 +1,5 @@
 import os
 from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
@@ -24,33 +23,44 @@ def create_app(test_config=None):
         response.headers.add("Access-Control-Allow-Headers", "Content-Type")
         return response
 
-
     @app.route("/categories")
-    def categories():
+    def get_categories():
         categories = db.session.query(Category).order_by(Category.id).all()
         return jsonify({"categories": [category.format() for category in categories]})
 
+    @app.route("/questions", methods=["GET", "POST"])
+    def get_or_create_questions():
+        if request.method == "GET":
+            page = int(request.args.get("page", 1))
+            start = (page -1) * QUESTIONS_PER_PAGE
+            end = page * QUESTIONS_PER_PAGE
+            search_term = request.args.get("query")
 
-    '''
-    @TODO: 
-    Create an endpoint to handle GET requests for questions, 
-    including pagination (every 10 questions). 
-    This endpoint should return a list of questions, 
-    number of total questions, current category, categories. 
-  
-    TEST: At this point, when you start the application
-    you should see questions and categories generated,
-    ten questions per page and pagination at the bottom of the screen for three pages.
-    Clicking on the page numbers should update the questions. 
-    '''
+            db_query = db.session.query(Question)
+            if search_term is not None:
+                db_query = db_query.filter(Question.question.contains(search_term))
+            questions = db_query.order_by(Question.id).all()
 
-    '''
-    @TODO: 
-    Create an endpoint to DELETE question using a question ID. 
-  
-    TEST: When you click the trash icon next to a question, the question will be removed.
-    This removal will persist in the database and when you refresh the page. 
-    '''
+            return jsonify({"questions": [question.format() for question in questions][start:end], "total_questions": len(questions)})
+        else:
+            question_body = request.get_json()
+            new_question = Question(question=question_body["question"], answer=question_body["answer"], category=question_body["category"], difficulty=question_body["difficulty"])
+            new_question.insert()
+            return jsonify(new_question.id)
+
+    @app.route("/categories/<category_id>/questions")
+    def get_questions_by_category(category_id):
+        questions = db.session.query(Question).filter(Question.category == category_id).all()
+        return jsonify({"questions": [question.format() for question in questions], "total_questions": len(questions)})
+
+    @app.route("/questions/<int:question_id>", methods=["DELETE"])
+    def delete_question(question_id):
+        question = db.session.query(Question).filter(Question.id == question_id).one_or_none()
+        if question is None:
+            abort(404)
+
+        question.delete()
+        return jsonify(question.id)
 
     '''
     @TODO: 
@@ -63,25 +73,6 @@ def create_app(test_config=None):
     of the questions list in the "List" tab.  
     '''
 
-    '''
-    @TODO: 
-    Create a POST endpoint to get questions based on a search term. 
-    It should return any questions for whom the search term 
-    is a substring of the question. 
-  
-    TEST: Search by any phrase. The questions list will update to include 
-    only question that include that string within their question. 
-    Try using the word "title" to start. 
-    '''
-
-    '''
-    @TODO: 
-    Create a GET endpoint to get questions based on category. 
-  
-    TEST: In the "List" tab / main screen, clicking on one of the 
-    categories in the left column will cause only questions of that 
-    category to be shown. 
-    '''
 
 
     '''

@@ -3,18 +3,18 @@ import React, { Component } from 'react'
 class Search extends Component {
   state = {
     query: '',
-  }
+  };
 
   getInfo = (event) => {
     event.preventDefault();
     this.props.submitSearch(this.state.query)
-  }
+  };
 
   handleInputChange = () => {
     this.setState({
       query: this.search.value
     })
-  }
+  };
 
   render() {
     return (

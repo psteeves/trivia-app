@@ -13,25 +13,38 @@ class QuestionView extends Component {
       questions: [],
       page: 1,
       totalQuestions: 0,
-      categories: {},
+      categories: [],
       currentCategory: null,
     }
   }
 
   componentDidMount() {
+    this.getCategories();
     this.getQuestions();
   }
 
+  getCategories = () => {
+    $.ajax({
+      url: `${BACKEND_URL}/categories`,
+      type: "GET",
+      success: (result) => {
+        this.setState({ categories: result.categories })
+      },
+      error: (error) => {
+        alert('Unable to load categories. Please try your request again')
+      }
+    })
+  };
+
   getQuestions = () => {
     $.ajax({
-      url: `${BACKEND_URL}/questions?page=${this.state.page}`, //TODO: update request URL
+      url: `${BACKEND_URL}/questions?page=${this.state.page}`,
       type: "GET",
       success: (result) => {
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
-          categories: result.categories,
-          currentCategory: result.current_category })
+          currentCategory: null })
       },
       error: () => {
         alert('Unable to load questions. Please try your request again')
@@ -59,13 +72,14 @@ class QuestionView extends Component {
 
   getByCategory= (id) => {
     $.ajax({
-      url: `${BACKEND_URL}/categories/${id}/questions`, //TODO: update request URL
+      url: `${BACKEND_URL}/categories/${id}/questions`,
       type: "GET",
       success: (result) => {
+        console.log(result.questions);
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
-          currentCategory: result.current_category })
+          currentCategory: id })
       },
       error: (error) => {
         alert('Unable to load questions. Please try your request again')
@@ -74,21 +88,15 @@ class QuestionView extends Component {
   };
 
   submitSearch = (searchTerm) => {
+    console.log(searchTerm);
     $.ajax({
-      url: `${BACKEND_URL}/questions`, //TODO: update request URL
-      type: "POST",
-      dataType: 'json',
-      contentType: 'application/json',
-      data: JSON.stringify({searchTerm: searchTerm}),
-      xhrFields: {
-        withCredentials: true
-      },
-      crossDomain: true,
+      url: `${BACKEND_URL}/questions?query=${searchTerm}`,
+      type: "GET",
       success: (result) => {
+        console.log(result.questions);
         this.setState({
           questions: result.questions,
-          totalQuestions: result.total_questions,
-          currentCategory: result.current_category })
+          totalQuestions: result.total_questions})
       },
       error: (error) => {
         alert('Unable to load questions. Please try your request again')
@@ -100,7 +108,7 @@ class QuestionView extends Component {
     if(action === 'DELETE') {
       if(window.confirm('are you sure you want to delete the question?')) {
         $.ajax({
-          url: `${BACKEND_URL}/questions/${id}`, //TODO: update request URL
+          url: `${BACKEND_URL}/questions/${id}`,
           type: "DELETE",
           success: (result) => {
             this.getQuestions();
@@ -119,10 +127,9 @@ class QuestionView extends Component {
         <div className="categories-list">
           <h2 onClick={() => {this.getQuestions()}}>Categories</h2>
           <ul>
-            {Object.keys(this.state.categories).map((id, ) => (
-              <li key={id} onClick={() => {this.getByCategory(id)}}>
-                {this.state.categories[id]}
-                <img className="category" src={`${this.state.categories[id]}.svg`}/>
+            {this.state.categories.map((category) => (
+              <li key={category.id} onClick={() => {this.getByCategory(category.id)}}>
+                {category.type}
               </li>
             ))}
           </ul>
@@ -135,7 +142,6 @@ class QuestionView extends Component {
               key={q.id}
               question={q.question}
               answer={q.answer}
-              category={this.state.categories[q.category]} 
               difficulty={q.difficulty}
               questionAction={this.questionAction(q.id)}
             />
