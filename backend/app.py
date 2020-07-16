@@ -13,18 +13,17 @@ def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     setup_db(app)
+    CORS(app)
 
     @app.route("/ping")
     def index():
         return jsonify("pong")
 
-    '''
-    @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
-    '''
+    @app.after_request
+    def after_request(response):
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+        return response
 
-    '''
-    @TODO: Use the after_request decorator to set Access-Control-Allow
-    '''
 
     @app.route("/categories")
     def categories():
