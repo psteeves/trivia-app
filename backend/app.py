@@ -62,16 +62,19 @@ def create_app(test_config=None):
         question.delete()
         return jsonify(question.id)
 
-    '''
-    @TODO: 
-    Create an endpoint to POST a new question, 
-    which will require the question and answer text, 
-    category, and difficulty score.
-  
-    TEST: When you submit a question on the "Add" tab, 
-    the form will clear and the question will appear at the end of the last page
-    of the questions list in the "List" tab.  
-    '''
+    @app.route("/quizzes", methods=["POST"])
+    def quizzes():
+        request_body = request.get_json()
+        category = request_body["quiz_category"]
+        previous_questions = request_body["previous_questions"]
+        questions = db.session.query(Question).filter(Question.category == category).all()
+        new_questions = [q for q in questions if q.id not in previous_questions]
+
+        if not new_questions:
+            new_question = None
+        else:
+            new_question = random.choice(new_questions).format()
+        return jsonify({"question": new_question})
 
 
 
@@ -85,12 +88,6 @@ def create_app(test_config=None):
     TEST: In the "Play" tab, after a user selects "All" or a category,
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not. 
-    '''
-
-    '''
-    @TODO: 
-    Create error handlers for all expected errors 
-    including 404 and 422. 
     '''
 
     return app

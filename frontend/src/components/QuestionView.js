@@ -75,7 +75,6 @@ class QuestionView extends Component {
       url: `${BACKEND_URL}/categories/${id}/questions`,
       type: "GET",
       success: (result) => {
-        console.log(result.questions);
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
@@ -88,12 +87,10 @@ class QuestionView extends Component {
   };
 
   submitSearch = (searchTerm) => {
-    console.log(searchTerm);
     $.ajax({
       url: `${BACKEND_URL}/questions?query=${searchTerm}`,
       type: "GET",
       success: (result) => {
-        console.log(result.questions);
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions})
